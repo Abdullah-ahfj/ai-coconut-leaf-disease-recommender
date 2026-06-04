@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+backend/venv/
+
+# Dataset
+dataset/CoconutLeaves
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+
+# Environment variables
+.env
