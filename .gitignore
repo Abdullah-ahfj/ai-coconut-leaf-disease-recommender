@@ -7,7 +7,7 @@ venv/
 backend/venv/
 
 # Dataset
-dataset/CoconutLeaves
+dataset/
 
 # Jupyter
 .ipynb_checkpoints/
