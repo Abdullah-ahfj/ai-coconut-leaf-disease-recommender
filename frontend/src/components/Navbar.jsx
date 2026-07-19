@@ -1,52 +1,82 @@
-import { Link } from "react-router-dom";
-import Logo from "../assets/summer.png"
+import { Link, NavLink } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
+const publicLinks = [
+  { name: "Home", path: "/" },
+];
+
+const privateLinks = [
+  { name: "Dashboard", path: "/dashboard" },
+  { name: "Diagnose", path: "/diagnose" },
+  { name: "History", path: "/history" },
+];
+
+function linkClasses({ isActive }) {
+  return [
+    "rounded-md px-3 py-2 text-sm font-medium transition",
+    isActive
+      ? "bg-emerald-100 text-emerald-800"
+      : "text-slate-700 hover:bg-slate-100 hover:text-emerald-700",
+  ].join(" ");
+}
 
 export default function Navbar() {
-  return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+  const { isAuthenticated, logout } = useAuth();
 
-        <Link
-          to="/"
-          className="text-2xl font-bold text-green-700 flex items-center space-x-2"
-        >
-          <span className="flex items-center space-x-2">
-            <span className="text-green-700 px-0 mx-0">Coco</span>
-            <span className="text-amber-950 px-0 mx-0">Guard</span>
-            <img 
-              src={Logo} 
-              alt="logo" 
-              className="w-10 h-auto" // smaller & responsive
-            />
-          </span>
+  return (
+    <header className="border-b border-slate-200 bg-white">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <Link to="/" className="text-xl font-bold text-emerald-700">
+          CocoGuard
         </Link>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2">
+          {publicLinks.map((link) => (
+            <NavLink
+              key={link.path}
+              to={link.path}
+              className={linkClasses}
+            >
+              {link.name}
+            </NavLink>
+          ))}
 
-          <Link
-            to="/"
-            className="text-gray-700 hover:text-green-700"
-          >
-            Home
-          </Link>
+          {isAuthenticated ? (
+            <>
+              {privateLinks.map((link) => (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  className={linkClasses}
+                >
+                  {link.name}
+                </NavLink>
+              ))}
 
-          <Link
-            to="/login"
-            className="text-gray-700 hover:text-green-700"
-          >
-            Login
-          </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className="ml-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink to="/login" className={linkClasses}>
+                Login
+              </NavLink>
 
-          <Link
-            to="/register"
-            className="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800"
-          >
-            Register
-          </Link>
-
+              <Link
+                to="/register"
+                className="ml-2 rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-800"
+              >
+                Register
+              </Link>
+            </>
+          )}
         </div>
-
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }
