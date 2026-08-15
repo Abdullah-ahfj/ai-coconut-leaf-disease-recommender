@@ -14,6 +14,7 @@ import History from "./pages/History";
 export default function App() {
   return (
     <BrowserRouter>
+      <Navbar />
       <div className="flex min-h-screen flex-col bg-slate-50">
 
         <main className="flex-1">
@@ -52,6 +53,7 @@ export default function App() {
         </main>
 
       </div>
+      <Footer />
     </BrowserRouter>
   );
 }
