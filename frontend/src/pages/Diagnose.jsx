@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import CameraCapture from "../components/CameraCapture";
 import PredictionCard from "../components/PredictionCard";
 import UploadCard from "../components/UploadCard";
+import api from "../services/api";
 
 export default function Diagnose() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -32,18 +33,33 @@ export default function Diagnose() {
     setResult(null);
     setIsAnalysing(true);
 
-    // Temporary result used until the Flask prediction API is connected.
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const formData = new FormData();
 
-    setResult({
-      isCoconutLeaf: true,
-      predictedClass: "Gray Leaf Spot",
-      confidence: 94.63,
-      recommendation:
-        "Remove severely affected material, maintain field sanitation, avoid unnecessary moisture on foliage, and follow locally approved treatment guidance.",
-    });
+      formData.append("image", selectedFile);
 
-    setIsAnalysing(false);
+      const response = await api.post(
+        "/predictions/predict",
+        formData
+      );
+
+      const prediction = response.data.prediction;
+
+      setResult({
+        isCoconutLeaf: true,
+        predictedClass: prediction.class,
+        confidence: prediction.confidence,
+        recommendation: prediction.recommendation,
+      });
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        "The image could not be analysed. Please try again.";
+
+      setError(message);
+    } finally {
+      setIsAnalysing(false);
+    }
   };
 
   useEffect(() => {
