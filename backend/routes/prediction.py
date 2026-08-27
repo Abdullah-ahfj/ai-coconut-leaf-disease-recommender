@@ -7,6 +7,11 @@ from werkzeug.utils import secure_filename
 from services.predictor import predict_image
 from services.recommender import get_recommendation
 
+from flask import Blueprint, current_app, jsonify, request, session
+
+from models import db
+from models.prediction import Prediction
+
 
 prediction_bp = Blueprint(
     "prediction",
@@ -20,16 +25,16 @@ ALLOWED_EXTENSIONS = {
     ".png"
 }
 
-
-@prediction_bp.get("/test")
-def test_prediction():
-    return jsonify({
-        "message": "Prediction route is working."
-    }), 200
-
-
 @prediction_bp.post("/predict")
 def predict():
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return jsonify({
+            "status": "error",
+            "message": "You must be logged in to make a prediction."
+        }), 401
+    
     if "image" not in request.files:
         return jsonify({
             "status": "error",
@@ -82,12 +87,25 @@ def predict():
             result["predicted_class"]
         )
 
+        prediction_record = Prediction(
+            user_id=user_id,
+            image_path=str(image_path),
+            predicted_class=result["predicted_class"],
+            confidence=result["confidence"],
+            recommendation=recommendation
+        )
+
+        db.session.add(prediction_record)
+        db.session.commit()
+
         return jsonify({
             "status": "success",
             "prediction": {
+                "id": prediction_record.id,
                 "class": result["predicted_class"],
                 "confidence": result["confidence"],
-                "recommendation": recommendation
+                "recommendation": recommendation,
+                "created_at": prediction_record.created_at.isoformat()
             }
         }), 200
 

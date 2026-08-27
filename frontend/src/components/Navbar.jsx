@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const publicLinks = [
@@ -21,7 +21,19 @@ function linkClasses({ isActive }) {
 }
 
 export default function Navbar() {
-  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const {
+    user,
+    logout,
+  } = useAuth();
+
+  const isAuthenticated = !!user;
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   return (
     <header className="border-b border-slate-200 bg-white">
@@ -55,7 +67,7 @@ export default function Navbar() {
 
               <button
                 type="button"
-                onClick={logout}
+                onClick={handleLogout}
                 className="ml-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
               >
                 Logout

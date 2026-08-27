@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
@@ -8,9 +8,11 @@ export default function Login() {
     password: "",
   });
 
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -21,20 +23,28 @@ export default function Login() {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Temporary frontend login.
-    // This will later be replaced with the Flask authentication API.
-    login({
-      id: 1,
-      username: "Demo User",
-      email: formData.email,
-    });
+    setError("");
+    setLoading(true);
 
-    navigate(location.state?.from || "/dashboard", {
-      replace: true,
-    });
+    try {
+      await login(
+        formData.email,
+        formData.password
+      );
+
+      navigate("/dashboard");
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        "Login failed.";
+
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -70,6 +80,12 @@ export default function Login() {
           <p className="mt-2 text-slate-600">
             Enter your account details to continue.
           </p>
+
+          {error && (
+            <div className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <div>
@@ -116,9 +132,10 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-4 focus:ring-emerald-200"
+              disabled={loading}
+              className="w-full rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Sign In
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
@@ -130,10 +147,6 @@ export default function Login() {
             >
               Create one
             </Link>
-          </p>
-
-          <p className="mt-4 rounded-lg bg-amber-50 p-3 text-center text-xs text-amber-800">
-            Authentication is currently running in frontend test mode.
           </p>
         </div>
       </div>

@@ -8,6 +8,10 @@ DATABASE_PATH = BASE_DIR / "database" / "coconut.db"
 class Config:
     SECRET_KEY = "cocoguard-local-development-key"
 
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = False
+
     SQLALCHEMY_DATABASE_URI = (
         f"sqlite:///{DATABASE_PATH.as_posix()}"
     )

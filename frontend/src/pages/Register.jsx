@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -9,7 +10,11 @@ export default function Register() {
     confirmPassword: "",
   });
 
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const { register } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -18,21 +23,37 @@ export default function Register() {
       ...currentData,
       [name]: value,
     }));
-
-    setMessage("");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
+    setError("");
+
     if (formData.password !== formData.confirmPassword) {
-      setMessage("Passwords do not match.");
+      setError("Passwords do not match.");
       return;
     }
 
-    setMessage(
-      "Registration form is working. Backend registration will be connected later."
-    );
+    setLoading(true);
+
+    try {
+      await register(
+        formData.username,
+        formData.email,
+        formData.password
+      );
+
+      navigate("/login");
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        "Registration failed.";
+
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,6 +72,12 @@ export default function Register() {
             Register to diagnose images and maintain your prediction history.
           </p>
         </div>
+
+        {error && (
+          <div className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
@@ -139,17 +166,12 @@ export default function Register() {
             />
           </div>
 
-          {message && (
-            <p className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
-              {message}
-            </p>
-          )}
-
           <button
             type="submit"
-            className="w-full rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-4 focus:ring-emerald-200"
+            disabled={loading}
+            className="w-full rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Create Account
+            {loading ? "Creating account..." : "Create Account"}
           </button>
         </form>
 

@@ -77,7 +77,7 @@ export default function Diagnose() {
   }, [selectedFile]);
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-12">
+    <section className="mx-auto max-w-7xl px-6 py-12 justify-center">
       <div className="max-w-3xl">
         <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700">
           Coconut Leaf Diagnosis
@@ -101,7 +101,6 @@ export default function Diagnose() {
           onClear={clearImage}
         />
 
-        <CameraCapture onCapture={selectImage} />
       </div>
 
       {selectedFile && (
@@ -126,11 +125,6 @@ export default function Diagnose() {
       <div className="mt-8">
         <PredictionCard result={result} />
       </div>
-
-      <p className="mt-6 text-xs text-slate-500">
-        Current diagnosis output is temporary frontend test data. The trained
-        model and Flask API will replace it later.
-      </p>
     </section>
   );
 }
