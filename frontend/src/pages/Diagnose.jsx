@@ -35,14 +35,9 @@ export default function Diagnose() {
 
     try {
       const formData = new FormData();
-
       formData.append("image", selectedFile);
 
-      const response = await api.post(
-        "/predictions/predict",
-        formData
-      );
-
+      const response = await api.post("/predictions/predict", formData);
       const prediction = response.data.prediction;
 
       setResult({
@@ -55,7 +50,6 @@ export default function Diagnose() {
       const message =
         error.response?.data?.message ||
         "The image could not be analysed. Please try again.";
-
       setError(message);
     } finally {
       setIsAnalysing(false);
@@ -77,53 +71,99 @@ export default function Diagnose() {
   }, [selectedFile]);
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-12 justify-center">
-      <div className="max-w-3xl">
-        <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700">
-          Coconut Leaf Diagnosis
-        </p>
+    <section className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white">
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        {/* Header */}
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-emerald-700">
+            🌴 AI-Powered Diagnosis
+          </span>
 
-        <h1 className="mt-3 text-4xl font-bold text-slate-900">
-          Upload or capture a coconut leaf image
-        </h1>
+          <h1 className="mt-5 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+            Coconut Leaf Disease Detection
+          </h1>
 
-        <p className="mt-4 leading-7 text-slate-600">
-          Use a clear image with the leaf visible and reasonably well lit.
-          Images that do not appear to contain a coconut leaf will be rejected.
-        </p>
-      </div>
-
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        <UploadCard
-          selectedFile={selectedFile}
-          previewUrl={previewUrl}
-          onFileChange={selectImage}
-          onClear={clearImage}
-        />
-
-      </div>
-
-      {selectedFile && (
-        <div className="mt-6 flex justify-end">
-          <button
-            type="button"
-            onClick={handleDiagnose}
-            disabled={isAnalysing}
-            className="rounded-lg bg-emerald-700 px-7 py-3 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-emerald-400"
-          >
-            {isAnalysing ? "Analysing..." : "Diagnose Image"}
-          </button>
+          <p className="mt-4 text-base leading-7 text-slate-600">
+            Upload or capture a clear, well-lit photo of a coconut leaf.
+            Images that don't appear to contain a coconut leaf will be rejected.
+          </p>
         </div>
-      )}
 
-      {error && (
-        <p className="mt-6 rounded-lg bg-red-50 p-4 text-red-700">
-          {error}
-        </p>
-      )}
+        {/* Upload area */}
+        <div className="mx-auto mt-12 max-w-3xl rounded-3xl border border-emerald-100 bg-white p-6 shadow-xl shadow-emerald-900/5 sm:p-8">
+          <UploadCard
+            selectedFile={selectedFile}
+            previewUrl={previewUrl}
+            onFileChange={selectImage}
+            onClear={clearImage}
+          />
 
-      <div className="mt-8">
-        <PredictionCard result={result} />
+          {selectedFile && (
+            <div className="mt-8 flex justify-center">
+              <button
+                type="button"
+                onClick={handleDiagnose}
+                disabled={isAnalysing}
+                className="group relative inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-8 py-3.5 font-semibold text-white shadow-lg shadow-emerald-700/25 transition-all hover:bg-emerald-800 hover:shadow-emerald-800/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-emerald-300 disabled:shadow-none"
+              >
+                {isAnalysing && (
+                  <svg
+                    className="h-4 w-4 animate-spin text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    />
+                  </svg>
+                )}
+                {isAnalysing ? "Analysing..." : "Diagnose Image"}
+              </button>
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-6 flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 p-4">
+              <span className="mt-0.5 text-red-500">⚠</span>
+              <p className="text-sm font-medium text-red-700">{error}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Result */}
+        {result && (
+          <div className="mx-auto mt-8 max-w-3xl">
+            <PredictionCard result={result} />
+          </div>
+        )}
+
+        {/* Tips */}
+        <div className="mx-auto mt-14 grid max-w-3xl gap-4 sm:grid-cols-3">
+          {[
+            { icon: "☀️", title: "Good lighting", desc: "Natural daylight works best" },
+            { icon: "🍃", title: "Whole leaf", desc: "Keep the full leaf in frame" },
+            { icon: "🔍", title: "Sharp focus", desc: "Avoid blur and motion" },
+          ].map((tip) => (
+            <div
+              key={tip.title}
+              className="rounded-2xl border border-slate-100 bg-white p-5 text-center shadow-sm"
+            >
+              <div className="text-2xl">{tip.icon}</div>
+              <p className="mt-2 text-sm font-semibold text-slate-900">{tip.title}</p>
+              <p className="mt-1 text-xs text-slate-500">{tip.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
